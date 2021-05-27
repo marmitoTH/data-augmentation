@@ -9,3 +9,6 @@ coverage/
 
 # Environment Variables
 .env
+
+input/
+output/
