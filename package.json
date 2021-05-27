@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "augment": "node src/index"
+  },
   "dependencies": {
     "jimp": "^0.16.1",
     "lodash": "^4.17.21"
