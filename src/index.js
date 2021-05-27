@@ -1,8 +1,8 @@
 const fs = require('fs')
 const Jimp = require('jimp')
 
-const inputDir = 'src/images/Celerg'
-const outputDir = 'src/images/output/Celerg'
+const inputDir = process.argv[2]
+const outputDir = process.argv[3]
 
 const names = fs.readdirSync(inputDir)
 const images = names.map((name) => ({
@@ -12,7 +12,7 @@ const images = names.map((name) => ({
 
 const factory = async (image) => {
   return await Jimp.read(image.path).then((jimp) => {
-    return jimp.autocrop(0.2).resize(512, 512)
+    return jimp.autocrop(0.3).resize(512, 512)
   })
 }
 
@@ -22,9 +22,21 @@ const rotate = async (image, degrees, output) => {
   })
 }
 
-const mirror = async (image, output) => {
+const mirrorX = async (image, output) => {
   await factory(image).then((jimp) => {
     jimp.mirror(true, false).write(`${output}/m(h)-${image.name}`)
+  })
+}
+
+const mirrorY = async (image, output) => {
+  await factory(image).then((jimp) => {
+    jimp.mirror(false, true).write(`${output}/m(v)-${image.name}`)
+  })
+}
+
+const brightness = async (image, value, output) => {
+  await factory(image).then((jimp) => {
+    jimp.brightness(value).write(`${output}/bt(${value})-${image.name}`)
   })
 }
 
@@ -34,17 +46,28 @@ const contrast = async (image, value, output) => {
   })
 }
 
+const blur = async (image, value, output) => {
+  await factory(image).then((jimp) => {
+    jimp.blur(value).write(`${output}/b(${value})-${image.name}`)
+  })
+}
+
 const run = async () => {
   await Promise.all(
     images.map(async (image) => {
-      rotate(image, 0, outputDir)
-      rotate(image, 45, outputDir)
-      rotate(image, -45, outputDir)
-      rotate(image, 90, outputDir)
-      rotate(image, -90, outputDir)
-      rotate(image, 180, outputDir)
-      mirror(image, outputDir)
-      contrast(image, 0.5, outputDir)
+      await rotate(image, 0, outputDir)
+      await rotate(image, 45, outputDir)
+      await rotate(image, -45, outputDir)
+      await rotate(image, 90, outputDir)
+      await rotate(image, -90, outputDir)
+      await rotate(image, 180, outputDir)
+      await mirrorX(image, outputDir)
+      await mirrorY(image, outputDir)
+      await contrast(image, 0.5, outputDir)
+      await contrast(image, -0.5, outputDir)
+      await blur(image, 3, outputDir)
+      await brightness(image, 0.5, outputDir)
+      await brightness(image, -0.5, outputDir)
     })
   )
 }
